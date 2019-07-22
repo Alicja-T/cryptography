@@ -120,7 +120,7 @@ decrypt(FILE *encrypted, FILE* key) {
 	}
 
 	unsigned char previous_buffer[BUFFERSIZE];
-	size_t read_iv = fread(previous_buffer, 1, BUFFERSIZE, encrypted);
+	size_t read_iv = fread(previous_buffer, 1, BUFFERSIZE, encrypted); //first block is from random IV
 	if (read_result != BUFFERSIZE) {
 		printf("drama, can't read the first block!\n");
 	}
@@ -232,7 +232,8 @@ int main(int argc, char* argv[]) {
 				exit(0);
 			}
 		}
-	}
+	} 
+
 
 	return 0;
 }
