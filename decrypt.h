@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "utils.h"
 
-void decrypt(FILE *encrypted, unsigned char keybuffer[], long int file_size);
+void decrypt(unsigned char *encrypted, unsigned char keybuffer[], int blocks_number);
 void decrypt_file(char* cipherpath, char* keypath);
 
 #endif //DECRYPT_H

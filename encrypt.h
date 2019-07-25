@@ -4,9 +4,8 @@
 #include <stdio.h>
 #include "utils.h"
 
-void generate_key(unsigned char key[]);
 
-void encrypt(FILE *source, unsigned char key[], long int file_size);
+void encrypt(unsigned char *source, unsigned char key[], int blocks_number);
 
 void encrypt_file(char *filepath);
 
