@@ -32,14 +32,14 @@ void encrypt(unsigned char *source, unsigned char key[], int blocks_number) {
 	
 	while (block_count < blocks_number) {
 		unsigned char cipher_buffer[BLOCK_SIZE];
-		for (int i = 0; i < 8; i++) {
-			printf("first 8 chars of source before encryption: %d: %c\n", i , source_buffer[i]);
-		}
+		//for (int i = 0; i < 8; i++) {
+		//	printf("first 8 chars of source before encryption: %d: %c\n", i , source_buffer[i]);
+		//}
 
 		encrypt_buffer(key, source_buffer, cipher_buffer, previous_block);
-		for (int i = 0; i < 8; i++) {
-			printf("first 8 chars of source after encryption: %d: %c\n", i, source_buffer[i]);
-		}
+		//for (int i = 0; i < 8; i++) {
+		//	printf("first 8 chars of source after encryption: %d: %c\n", i, source_buffer[i]);
+		//}
 		printf("block count: %d \n", block_count);
 		if (block_count <= blocks_number) {
 			source_buffer = source_buffer + BLOCK_SIZE;
@@ -55,9 +55,9 @@ void encrypt_file(char *filepath) {
 	long int filesize = get_file_size(filepath);
 	
 	char filename_buffer[80];
-	memset(filename_buffer, '\0', 80);
 	int len = strlen(filepath);
-	strcpy(filename_buffer, filepath, len);
+	printf("length of filepath %d \n", len);
+	strcpy_s(filename_buffer, len + 1, filepath);
 			
 	source_error = fopen_s(&sourcefile, filepath, "rb");
 	if (source_error != 0) {

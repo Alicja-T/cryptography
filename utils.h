@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 /*
 utils.h contains functions that are used by both encryption and decryption functions.
@@ -23,7 +24,7 @@ long int get_file_size(char* filepath);
 
 void printBits(size_t const size, void const * const ptr);
 
-void transpose8(unsigned char *, unsigned char *);
+void transpose8(unsigned char input[8]);
 
 void save_result(unsigned char* file_path, unsigned char *buffer, long int buffer_size);
 

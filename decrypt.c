@@ -56,7 +56,9 @@ void decrypt_file(char* encrypted_name, char* keypath) {
 	errno_t key_error;
 	long int filesize = get_file_size(encrypted_name);
 
-	printf("File %s size: %d\n", encrypted_name, filesize);
+	if (filesize == -1) {
+		exit(1);
+	}
 
 	encrypted_error = fopen_s(&encrypted_file, encrypted_name, "rb");
 	if (encrypted_error != 0) {
@@ -80,6 +82,7 @@ void decrypt_file(char* encrypted_name, char* keypath) {
 	}
 	else {
 		printf("key read successfully\n");
+		fclose(keyfile);
 	}
 	
 	if (filesize != -1) {
@@ -98,9 +101,8 @@ void decrypt_file(char* encrypted_name, char* keypath) {
 			int final_size = blocks_number * BLOCK_SIZE - padding;
 
 			char filename_buffer[80];
-			memset(filename_buffer, '\0', 80);
 			int len = strlen(encrypted_name);
-			strcpy(filename_buffer, encrypted_name, len);
+			strcpy_s(filename_buffer, len+1, encrypted_name);
 
 			get_new_filename(filename_buffer, DECRYPTED_FILE);
 			save_result(filename_buffer, encrypted_buffer + KEY_SIZE, final_size);
