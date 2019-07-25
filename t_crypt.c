@@ -3,6 +3,11 @@
 #include "encrypt.h"
 #include "decrypt.h"
 
+/*
+Main parses command line arguments and redirects control to encrypting or decrypting modules
+depending on the mode. 
+*/
+
 
 int main(int argc, char* argv[]) {
 		

@@ -2,7 +2,7 @@
 #include "decrypt.h"
 
 static void decrypt_buffer(unsigned char key[], unsigned char result[], unsigned char cipher[], unsigned char previous[]) { //simple decryption using CBC to be upgraded
-	for (int i = 0; i < BUFFERSIZE; i++) {
+	for (int i = 0; i < BLOCK_SIZE; i++) {
 		result[i] = key[i] ^ cipher[i];
 		result[i] ^= previous[i];
 		previous[i] = cipher[i];
@@ -11,32 +11,13 @@ static void decrypt_buffer(unsigned char key[], unsigned char result[], unsigned
 }
 
 int remove_padding(unsigned char source[]) {
-	int padding = source[BUFFERSIZE - 1];
-	for (int i = BUFFERSIZE - 2; i > BUFFERSIZE - padding - 1; i--) {
+	int padding = source[BLOCK_SIZE - 1];
+	for (int i = BLOCK_SIZE - 2; i > BLOCK_SIZE - padding - 1; i--) {
 		if (source[i] != padding) {
 			return 0;
 		}
 	}
 	return padding;
-}
-
-static void save_decrypted(unsigned char *file_name, unsigned char *result, long int file_size) {
-	FILE *result_file;
-	errno_t write_err;
-	int name_length = 0;
-	while (file_name[name_length++]);
-	char new_file_name[80];
-	strncpy(new_file_name, file_name, name_length - 4);
-	new_file_name[name_length - 5] = '\0';
-	printf("new file name: %s\n", new_file_name);
-
-	write_err = fopen_s(&result_file, "result1.txt", "wb");
-	if (write_err != 0) {
-		fprintf(stderr, "write error");
-		exit(1);
-	}
-	write_err = fwrite(result, 1, file_size, result_file);
-	printf("write result %d\n", write_err);
 }
 
 void decrypt(unsigned char *encrypted, unsigned char key[], int blocks_number) {
@@ -45,21 +26,21 @@ void decrypt(unsigned char *encrypted, unsigned char key[], int blocks_number) {
 		
 	int block_count = 0;
 	
-	unsigned char previous_block[KEYSIZE];
-	for (int i = 0; i < KEYSIZE; i++) {
+	unsigned char previous_block[KEY_SIZE];
+	for (int i = 0; i < KEY_SIZE; i++) {
 		previous_block[i] = encrypted[i];
 	}
 
 	unsigned char *encrypted_buffer;
-	encrypted_buffer = encrypted + KEYSIZE;
+	encrypted_buffer = encrypted + KEY_SIZE;
 	
 	while (block_count < blocks_number) {
 				
-		unsigned char result_buffer[BUFFERSIZE];
+		unsigned char result_buffer[BLOCK_SIZE];
 		decrypt_buffer(key, result_buffer, encrypted_buffer, previous_block);
 		
 		if (block_count <= blocks_number) {
-			encrypted_buffer += BUFFERSIZE;
+			encrypted_buffer += BLOCK_SIZE;
 		}
 		block_count++;
 	}
@@ -89,9 +70,9 @@ void decrypt_file(char* encrypted_name, char* keypath) {
 		exit(1);
 	}
 
-	unsigned char key_buffer[KEYSIZE];
-	size_t read_result = fread(key_buffer, 1, KEYSIZE, keyfile);
-	if (read_result != KEYSIZE) {
+	unsigned char key_buffer[KEY_SIZE];
+	size_t read_result = fread(key_buffer, 1, KEY_SIZE, keyfile);
+	if (read_result != KEY_SIZE) {
 		printf("Incomplete key\n");
 		fclose(encrypted_file);
 		fclose(keyfile);
@@ -103,7 +84,7 @@ void decrypt_file(char* encrypted_name, char* keypath) {
 	
 	if (filesize != -1) {
 		unsigned char *encrypted_buffer;
-		int blocks_number = (filesize - KEYSIZE) / BUFFERSIZE;
+		int blocks_number = (filesize - KEY_SIZE) / BLOCK_SIZE;
 		encrypted_buffer = malloc(filesize);
 		if (encrypted_buffer != NULL) {
 			fread(encrypted_buffer, filesize, 1, encrypted_file);
@@ -113,9 +94,16 @@ void decrypt_file(char* encrypted_name, char* keypath) {
 			printf("decrypting file %s\n", encrypted_name);
 			decrypt(encrypted_buffer, key_buffer, blocks_number);
 			
-			int padding = remove_padding(encrypted_buffer + KEYSIZE + (blocks_number - 1) * BUFFERSIZE);
-			int final_size = blocks_number * BUFFERSIZE - padding;
-			save_decrypted(encrypted_name, encrypted_buffer + KEYSIZE, final_size);
+			int padding = remove_padding(encrypted_buffer + KEY_SIZE + (blocks_number - 1) * BLOCK_SIZE);
+			int final_size = blocks_number * BLOCK_SIZE - padding;
+
+			char filename_buffer[80];
+			memset(filename_buffer, '\0', 80);
+			int len = strlen(encrypted_name);
+			strcpy(filename_buffer, encrypted_name, len);
+
+			get_new_filename(filename_buffer, DECRYPTED_FILE);
+			save_result(filename_buffer, encrypted_buffer + KEY_SIZE, final_size);
 			free(encrypted_buffer);
 
 			fclose(keyfile);

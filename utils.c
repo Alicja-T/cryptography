@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
+
 #include <time.h>
 #include <errno.h>
 #include "utils.h"
@@ -7,9 +6,12 @@
 
 void get_random_block(unsigned char buffer[], int size) {
 	time_t now = time(NULL);
-	srand( rand(now) );
-	printf("time returned %d\n", now);
+	int seed = rand();
+	srand(seed);
+	printf("seed returned %ld\n", seed);
 	for (int i = 0; i < size; i++) {
+		seed = rand();
+		srand(seed);
 		buffer[i] = rand() % 256;
 	}
 }
@@ -47,7 +49,7 @@ void printBits(size_t const size, void const * const ptr){
 }
 
 void transpose8(unsigned char * source, unsigned char * result) {
-	unsigned long long x;
+	unsigned long long x = 0;
 	int i;
 	for (i = 0; i <= 7; i++) {
 		x = x << 8 | source[i];
@@ -68,4 +70,49 @@ void transpose8(unsigned char * source, unsigned char * result) {
 		x = x >> 8;
 	}
 
+}
+
+void save_result(unsigned char* file_path, unsigned char *buffer, long int buffer_size) {
+	FILE *result_file;
+	errno_t write_err;
+	
+	write_err = fopen_s(&result_file, file_path, "wb");
+	if (write_err != 0) {
+		fprintf(stderr, "write error");
+		exit(1);
+	}
+	else {
+		write_err = fwrite(buffer, 1, buffer_size, result_file);
+		printf("write result %d\n", write_err);
+		fclose(result_file);
+		result_file = NULL;
+	}
+}
+
+void get_new_filename(unsigned char* file_name, int mode) {
+	
+	switch (mode) {
+
+		// adding key file extension
+		case KEY_FILE: {
+			time_t now = time(0);
+			sprintf_s(file_name, 50, "%d.pkey", now);
+			break;
+		}
+		// addint new extension
+		case ENCRYPTED_FILE: 
+			sprintf_s(file_name, 50, "%s.enc", file_name);
+			break;
+		
+		// stripping off extension
+		case DECRYPTED_FILE: {
+			size_t len = strlen(file_name);
+			for (size_t i = len - 1; i > len - 4; i--) {
+				file_name[i] = '\0';
+			}
+			break;
+		}
+		default: ;
+	}
+	
 }
