@@ -7,16 +7,14 @@
 #include <stdio.h>
 #include <string.h>
 
+
 /*
 utils.h contains functions that are used by both encryption and decryption functions.
 */
 
+enum file_type { KEY_FILE, ENCRYPTED_FILE, DECRYPTED_FILE };
 
-#define BLOCK_SIZE 64
-#define KEY_SIZE 64
-#define KEY_FILE 1
-#define ENCRYPTED_FILE 2
-#define DECRYPTED_FILE 3
+enum buffer_size {KEY_SIZE = 64, BLOCK_SIZE = 256};
 
 void get_random_block(unsigned char buffer[], int size);
 
@@ -26,9 +24,9 @@ void printBits(size_t const size, void const * const ptr);
 
 void transpose8(unsigned char input[8]);
 
-void save_result(unsigned char* file_path, unsigned char *buffer, long int buffer_size);
+void save_result(char* file_path, unsigned char *buffer, long int buffer_size);
 
-void get_new_filename(unsigned char* file_name, int mode);
+void get_new_filename(char* file_name, int mode);
 
 
 #endif // !UTILS_H

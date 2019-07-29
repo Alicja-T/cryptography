@@ -4,9 +4,10 @@
 #include <errno.h>
 #include "utils.h"
 
+
 /*
-	Function get_random_block sets the bits in the buffer using random numbers generator.
-	Random numbers generator is seeded with milliseconds to increase randomness.
+	Function get_random_block puts the bytes in the buffer using random numbers generator.
+	Random numbers generator is seeded with milliseconds to increase randomness. 
 */
 
 void get_random_block(unsigned char buffer[], int size) {
@@ -29,23 +30,21 @@ void get_random_block(unsigned char buffer[], int size) {
 			
 			for (int j = 0; j < 8; j++) {
 				key_matrix[j] = buffer[i * 8 + j];
-				printf("bits of key_matrix before transpose at index j = %d ", j);
-				printBits(1, &key_matrix[j]);
-				
 			}
 		
 			transpose8(key_matrix);
 			
 			for (int j = 0; j < 8; j++) {
 				buffer[i * 8 + j] = key_matrix[j];
-				printf("bits of key_matrix after transpose at index j = %d ", j);
-				printBits(1, &key_matrix[j]);
-				
 			}
 		}
 		millisec >>= 1;
 	}
 }
+
+/*
+Uses system call to get file size before opening. 
+*/
 
 long int get_file_size(char* filepath) {
 	struct _stat buffer;
@@ -53,7 +52,7 @@ long int get_file_size(char* filepath) {
 	int result = _stat(filepath, &buffer);
 	if (result != 0) {
 		if (errno == ENOENT) {
-			printf("File %s not found\n", filepath);
+			fprintf(stderr, strerror(errno));
 		}
 	}
 	else {
@@ -77,7 +76,6 @@ void printBits(size_t const size, void const * const ptr){
 		{
 			byte = (b[i] >> j) & 1;
 			printf("%u", byte);
-			
 		}
 		printf(" ");
 	}
@@ -86,7 +84,8 @@ void printBits(size_t const size, void const * const ptr){
 
 /*
 Function transpose8 takes input of 8 bytes source matrix, 
-transposes it as a 8x8 bit array, and stores the result in input array.
+transposes it as a 8x8 bit array and stores the result in input array.
+Source: "Hacker's Delight" Second Edition p.145
 */
 
 
@@ -111,28 +110,35 @@ void transpose8(unsigned char input[8]) {
 		input[i] = x;
 		x = x >> 8;
 	}
-
 }
 
-void save_result(unsigned char* file_path, unsigned char *buffer, long int buffer_size) {
+/*
+	Saves buffer of buffer_size to a file.
+*/
+
+void save_result(char* file_path, unsigned char *buffer, long int buffer_size) {
 	
 	FILE *result_file;
-	errno_t write_err;
+	long int write_result;
 	
-	write_err = fopen_s(&result_file, file_path, "wb");
-	if (write_err != 0) {
-		fprintf(stderr, "write error");
+	result_file = fopen(file_path, "wb");
+	if (result_file == NULL) {
+		fprintf(stderr, "write error: %s \n", strerror(errno));
 		exit(1);
 	}
 	else {
-		write_err = fwrite(buffer, 1, buffer_size, result_file);
-		printf("write result %d\n", write_err);
+		write_result = fwrite(buffer, 1, buffer_size, result_file);
+		printf("write result %ld\n", write_result);
 		fclose(result_file);
 		result_file = NULL;
 	}
 }
 
-void get_new_filename(unsigned char* file_name, int mode) {
+/*
+ Helper function to create/reconstruct unique file name.
+*/
+
+void get_new_filename(char* file_name, int mode) {
 	
 	switch (mode) {
 

@@ -9,10 +9,10 @@ assumed to consist of number of blocks size BLOCK_SIZE defined in utils.h.
 */
 
 
-void encrypt(unsigned char *source, unsigned char key[], int blocks_number);
+void encrypt_buffer(unsigned char *source, unsigned char key[], int blocks_number);
 
 /*
-Function encrypt_file opens file and loads it into a buffer. 
+Function encrypt_file opens file and loads it into a buffer using malloc. 
 */
 
 void encrypt_file(char *filepath);
